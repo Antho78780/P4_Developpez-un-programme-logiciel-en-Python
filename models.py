@@ -15,6 +15,7 @@ class Players:
                               f" sexe: {self.sex}, classement: {self.ranking}, score: {self.score}"
         return player_presentation
 
+
 class Tournaments:
     """Modèle représentant le tournoi"""
     def __init__(self, name, lieu, date, time, number_round=4):
@@ -23,6 +24,7 @@ class Tournaments:
         self.lieu = lieu
         self.date = date
         self.time = time
+        self.number_round = number_round
         self.add_player = []
         self.description = ""
 
@@ -32,6 +34,11 @@ class Tournaments:
         return tournament_presentation
 
 
+class Rounds:
+    def __init__(self, name, start_round, end_round):
+        self.name = name
+        self.start_round = start_round
+        self.end_round = end_round
 
 
 
