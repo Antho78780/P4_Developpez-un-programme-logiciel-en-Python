@@ -82,18 +82,27 @@ class View:
             menu_player()
 
     @staticmethod
-    def prompt_add_player_tournament(get_players_tournament_database, tournaments_add_player):
+    def get_players_tournaments_database(get_players_tournament_database):
         print("Joueurs enregistré dans la base de donnée: ")
         get_players_tournament_database()
-        print("Ajouter 8 joueurs")
-        for i in range(1, 3):
-            indice_player = int(input("Saisisez l'indice du joueur à 'ajouter au tournoi: "))
-            print("Joueur", i, "ajouté")
-            print(str(i)+"/2")
-            players = "Joueur" + str(i)
-            tournaments_add_player.append(players)
-        return tournaments_add_player
+        print("Ajouter 8 joueurs: ")
 
+    @staticmethod
+    def prompt_add_player(query, players, add_player, menu1=None, menu2=None, menu3=None, menu4=None):
+        player = query()
+        for i in range(1, 9):
+            first_name = input(f"Entrez le prenom du joueur{i}: ")
+            name = input(f"Entrez le nom du joueur{i}: ")
+            recupFirst_name = players.search(player.prenom == first_name)
+            name = players.search(player.nom == name)
+            if recupFirst_name and name:
+                print(f"Joueur{i} ajouté")
+                print(f"{i}/8")
+                for rF in recupFirst_name:
+                    add_player.append(rF)
+            else:
+                print("Joueur introuvable")
+                View.menu_tournament(menu1, menu2, menu3, menu4)
 
     @staticmethod
     def prompt_time_tournament(menu_player):
@@ -143,21 +152,24 @@ class View:
             View.menu_player(menu1, menu2, menu3)
 
     @staticmethod
-    def menu_tournament(menu1, menu2, menu3):
+    def menu_tournament(menu1, menu2, menu3, menu4):
         print("MENU TOURNOI")
         print("1: Créer un tournoi")
-        print("2: Voir tout les tournois")
-        print("3: Retour")
-        question = int(input("Saisisez 1 ou 2: "))
+        print("2: Accéder au tournoi")
+        print("3: Voir les informations du tournoi")
+        print("4: Retour")
+        question = int(input("Saisisez 1, 2, 3, 4: "))
         if question == 1:
             menu1()
         elif question == 2:
             menu2()
         elif question == 3:
             menu3()
+        elif question == 4:
+            menu4()
         else:
             print("Informations incorrect")
-            View.menu_tournament(menu1, menu2, menu3)
+            View.menu_tournament(menu1, menu2, menu3, menu4)
 
 
     @staticmethod
@@ -174,12 +186,12 @@ class View:
 
     @staticmethod
     def phrasing_none_tournaments():
-        print("Aucun tournois dans la base de données")
+        print("Il n'y a pas de tournois dans la base de donnée")
 
     @staticmethod
     def return_menu(menu):
         question = input("Retourner au menu: y ")
-        if question == "y":
+        if question == "y" or question == "Y":
             menu()
         else:
             print("Informations incorrect")
@@ -188,6 +200,10 @@ class View:
     @staticmethod
     def phrasing_len_players(players_table_all):
         print("Il y a", len(players_table_all()), "joueurs qui peuvent participer au tournoi")
+
+    @staticmethod
+    def phrasing_none_players_tournament(players):
+        print(f"Il y a {len(players())} joueurs enregistrés dans la base de donnée, echec de création de tournoi")
 
 
 
