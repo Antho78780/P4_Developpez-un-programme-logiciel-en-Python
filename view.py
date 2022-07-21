@@ -152,11 +152,11 @@ class View:
             View.menu_player(menu1, menu2, menu3)
 
     @staticmethod
-    def menu_tournament(menu1, menu2, menu3, menu4):
+    def menu_tournament(menu1, menu2, menu3, menu4,):
         print("MENU TOURNOI")
         print("1: Créer un tournoi")
         print("2: Accéder au tournoi")
-        print("3: Voir les informations du tournoi")
+        print("3: Voir les informations des tournois")
         print("4: Retour")
         question = int(input("Saisisez 1, 2, 3, 4: "))
         if question == 1:
@@ -204,6 +204,38 @@ class View:
     @staticmethod
     def phrasing_none_players_tournament(players):
         print(f"Il y a {len(players())} joueurs enregistrés dans la base de donnée, echec de création de tournoi")
+
+    @staticmethod
+    def prompt_round():
+        round = input("Entrez le nom du round: ")
+        return round
+
+    @staticmethod
+    def prompt_phrasing_name_tournament():
+        tournament = input("Quelle est le nom du tournoi: ")
+        return tournament
+
+
+
+    @staticmethod
+    def prompt_timeRound():
+        heure = input("Entrez l'heure du round: ")
+        return heure
+
+
+    @staticmethod
+    def prompt_dateRound():
+        date = input("Entrez la date du round: ")
+        return date
+
+    @staticmethod
+    def prompt_nRound():
+        nRound = int(input("Entrez le n° du round: "))
+        return nRound
+
+
+
+
 
 
 
