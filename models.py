@@ -35,10 +35,16 @@ class Tournaments:
 
 
 class Rounds:
-    def __init__(self, name, start_round, end_round):
+    def __init__(self, name, heure_round, date_round):
         self.name = name
-        self.start_round = start_round
-        self.end_round = end_round
+        self.list_match = []
+        self.date_round = date_round
+        self.heure_round = heure_round
+
+    def __str__(self):
+        round_presentation = f"nom: {self.name}, list_match: {self.list_match}, date_round: {self.date_round}, temps_round: {self.heure_round},"
+        return round_presentation
+
 
 
 
