@@ -1,3 +1,4 @@
+from operator import itemgetter
 class Controller:
     def __init__(self, Players, Tournaments, Rounds, View, Tinydb, Query):
         # Models
@@ -25,8 +26,6 @@ class Controller:
         print(tournaments)
         self.view.get_players_tournaments_database(self.get_players_database)
         self.view.prompt_add_player(self.Query, self.players_table, tournaments.add_player)
-        tournaments.rounds = []
-        tournaments.number_round = 0
         serialized_tournament = {
             "nom": tournaments.name,
             "lieu": tournaments.lieu,
@@ -55,7 +54,8 @@ class Controller:
             "nom": players.name,
             "date_de_naissance": players.date_birth,
             "sexe": players.sex,
-            "classement": players.ranking
+            "classement": players.ranking,
+            "score": players.score
         }
         self.players_table.insert(player_serialized)
         self.view.phrasing_create_player()
@@ -116,48 +116,69 @@ class Controller:
                 "Nom du tournoi": tournament["nom"]
             }
             print(objetTr)
-        search_name_tournament = self.tournaments_table.search(trt.nom == self.view.prompt_phrasing_name_tournament())
-        if search_name_tournament and search_name_tournament[0]["number_round"] == 0:
-            self.tournaments_table.update(
-                {"number_round": self.view.prompt_nRound()}, trt.nom == search_name_tournament[0]["nom"]
-            )
-            self.triePlayerRound(search_name_tournament, self.tournaments_table)
+        search_tournament = self.tournaments_table.search(trt.nom == self.view.prompt_phrasing_name_tournament())
+        if search_tournament:
+            search_tournament = self.tournaments_table.all()
+            print("Vous venez d'accéder au tournoi")
+            self.first_round(search_tournament)
+            self.after_first_round(search_tournament)
         else:
             print("Tournoi introuvable")
             self.return_menu()
 
     """Trie des joueurs au premier round"""
-    def triePlayerRound(self, search_name_tournament, tournament_table):
-        sup_moitie = search_name_tournament[0]["joueurs"][4:]
-        inf_moitie = search_name_tournament[0]["joueurs"][:4]
+    def first_round(self, search_tournament):
+        trt = self.Query()
+        self.players_table.remove(trt.score > 0.0)
+        self.view.prompt_nRound()
+        sup_moitie = search_tournament[0]["joueurs"][4:]
+        inf_moitie = search_tournament[0]["joueurs"][:4]
         sup_moitie.sort(key=lambda x: x.get("classement"))
         inf_moitie.sort(key=lambda x: x.get("classement"))
-        print("------------Joueurs-rangés-par-classement------------------")
-        for sup in sup_moitie:
-            print(sup)
-        for inf in inf_moitie:
-            print(inf)
-        print("---------------------------Round1-------------------------------")
-        match1 = ([sup_moitie[0]["prenom"], "score"], [inf_moitie[0]["prenom"], "score"])
-        match2 = ([sup_moitie[1]["prenom"], "score"], [inf_moitie[1]["prenom"], "score"])
-        match3 = ([sup_moitie[2]["prenom"], "score"], [inf_moitie[2]["prenom"], "score"])
-        match4 = ([sup_moitie[3]["prenom"], "score"], [inf_moitie[3]["prenom"], "score"])
+        print("----------------classement-des-joueurs---------------------")
+        self.delete_date_birth_sex(search_tournament[0]["joueurs"])
+        all_Match = []
+        for i in range(len(sup_moitie)):
+            match = ([sup_moitie[i]["prenom"]] + [sup_moitie[i]["score"]], [inf_moitie[i]["prenom"]] + [inf_moitie[i]["score"]])
+            print(match)
+            all_Match.append(match)
+        for Am in all_Match:
+            print(Am)
+            result_match_first_players = int(input(f"resultat du match pour {Am[0]}: "))
+            self.players_table.update({"score": result_match_first_players}, trt.prenom == Am[0][0])
+            result_match_last_players = int(input(f"resultat du match pour {Am[1]}: "))
+            self.players_table.update({"score": result_match_last_players}, trt.prenom == Am[1][0])
+        search_tournament[0]["joueurs"] = self.players_table.all()
+        print("Round fini")
+
+    def after_first_round(self, search_tournament):
+        trt = self.Query()
+        search_tournament[0]["joueurs"].sort(key=lambda x: (x.get("score"), x.get("classement")))
+        print(search_tournament[0]["joueurs"])
+        match1 = (
+            [search_tournament[0]["joueurs"][0]["prenom"]] + [search_tournament[0]["joueurs"][0]["score"]],
+            [search_tournament[0]["joueurs"][1]["prenom"]] + [search_tournament[0]["joueurs"][1]["score"]]
+        )
+        match2 = (
+            [search_tournament[0]["joueurs"][2]["prenom"]] + [search_tournament[0]["joueurs"][2]["score"]],
+            [search_tournament[0]["joueurs"][3]["prenom"]] + [search_tournament[0]["joueurs"][3]["score"]]
+        )
+        match3 = (
+            [search_tournament[0]["joueurs"][4]["prenom"]] + [search_tournament[0]["joueurs"][4]["score"]],
+            [search_tournament[0]["joueurs"][5]["prenom"]] + [search_tournament[0]["joueurs"][5]["score"]]
+        )
+        match4 = (
+            [search_tournament[0]["joueurs"][6]["prenom"]] + [search_tournament[0]["joueurs"][6]["score"]],
+            [search_tournament[0]["joueurs"][7]["prenom"]] + [search_tournament[0]["joueurs"][7]["score"]]
+        )
         print(match1)
         print(match2)
         print(match3)
         print(match4)
         for i in match1, match2, match3, match4:
-            print("----------------------Score-Match-------------------------")
-            print("Match: ", i)
-            result_match_first_players = int(input(f"resultat du match pour {i[0]}: "))
-            i[0][1] = result_match_first_players
-            result_match_last_players = int(input(f"resultat du match pour {i[1]}: "))
-            i[1][1] = result_match_last_players
-        tournament_table.update(
-            {"rounds": match1 + match2 + match3 + match4}
-        )
-        print("----------------------Résultat-Match--------------------------")
-        print(match1, match2, match3, match4)
+            result_match_first_players = int(input(f"resultat du match pour {i[0][0]}: "))
+            self.players_table.update({"score": result_match_first_players}, trt.prenom == i[0][0])
+        print(self.players_table.all())
 
 
     """Retour au menu"""
