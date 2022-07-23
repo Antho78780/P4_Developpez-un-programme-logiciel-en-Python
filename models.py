@@ -25,6 +25,7 @@ class Tournaments:
         self.date = date
         self.time = time
         self.number_round = number_round
+        self.rounds = []
         self.add_player = []
         self.description = ""
 
