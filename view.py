@@ -213,7 +213,7 @@ class View:
 
     @staticmethod
     def prompt_phrasing_name_tournament():
-        tournament = input("Quelle est le nom du tournoi: ")
+        tournament = input("Tapez le nom du tournoi: ")
         return tournament
 
 
@@ -231,6 +231,7 @@ class View:
 
     @staticmethod
     def prompt_nRound():
+        print("Créer le round")
         nRound = int(input("Tapez le n° du round: "))
         return nRound
 
