@@ -82,9 +82,9 @@ class View:
             menu_player()
 
     @staticmethod
-    def get_players_tournaments_database(get_players_tournament_database):
+    def get_players_tournaments_database(get_players_database):
         print("Joueurs enregistré dans la base de donnée: ")
-        get_players_tournament_database()
+        get_players_database()
         print("Ajouter 8 joueurs: ")
 
     @staticmethod
@@ -190,20 +190,21 @@ class View:
 
     @staticmethod
     def return_menu(menu):
-        question = input("Retourner au menu: y ")
+        question = input("Retourner au menu: y/n ")
         if question == "y" or question == "Y":
             menu()
+        elif question == "n" or question == "N":
+            pass
         else:
             print("Informations incorrect")
             View.return_menu(menu)
 
     @staticmethod
     def phrasing_len_players(players_table_all):
-        print("Il y a", len(players_table_all()), "joueurs qui peuvent participer au tournoi")
-
-    @staticmethod
-    def phrasing_none_players_tournament(players):
-        print(f"Il y a {len(players())} joueurs enregistrés dans la base de donnée, echec de création de tournoi")
+        if len(players_table_all()) < 8:
+            print("Il n'y a pas assez de joueurs pour participer a un tournoi")
+        else:
+            print("Il y a", len(players_table_all()), "joueurs qui peuvent participer au tournoi")
 
     @staticmethod
     def prompt_round():
@@ -230,8 +231,21 @@ class View:
 
     @staticmethod
     def prompt_nRound():
-        nRound = int(input("Entrez le n° du round: "))
+        nRound = int(input("Tapez le n° du round: "))
         return nRound
+
+    @staticmethod
+    def printNRound(number_round):
+        if number_round == 0:
+            print("Il n'y a pas de round créer")
+
+        elif number_round == 1:
+            print("Il y a deja un round qui a été créer")
+        else:
+            print("Il y a deja plusieurs rounds qui ont été créer")
+
+
+
 
 
 
