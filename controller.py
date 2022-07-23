@@ -129,7 +129,6 @@ class Controller:
     """Trie des joueurs au premier round"""
     def first_round(self, search_tournament):
         trt = self.Query()
-        self.players_table.remove(trt.score > 0.0)
         self.view.prompt_nRound()
         sup_moitie = search_tournament[0]["joueurs"][4:]
         inf_moitie = search_tournament[0]["joueurs"][:4]
@@ -154,7 +153,6 @@ class Controller:
     def after_first_round(self, search_tournament):
         trt = self.Query()
         search_tournament[0]["joueurs"].sort(key=lambda x: (x.get("score"), x.get("classement")))
-        print(search_tournament[0]["joueurs"])
         match1 = (
             [search_tournament[0]["joueurs"][0]["prenom"]] + [search_tournament[0]["joueurs"][0]["score"]],
             [search_tournament[0]["joueurs"][1]["prenom"]] + [search_tournament[0]["joueurs"][1]["score"]]
@@ -178,8 +176,6 @@ class Controller:
         for i in match1, match2, match3, match4:
             result_match_first_players = int(input(f"resultat du match pour {i[0][0]}: "))
             self.players_table.update({"score": result_match_first_players}, trt.prenom == i[0][0])
-        print(self.players_table.all())
-
 
     """Retour au menu"""
     def return_menu(self):
