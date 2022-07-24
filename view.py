@@ -189,12 +189,12 @@ class View:
         print("Il n'y a pas de tournois dans la base de donnée")
 
     @staticmethod
-    def return_menu(menu):
+    def return_menu(menu, choice_menu):
         question = input("Retourner au menu: y/n ")
         if question == "y" or question == "Y":
             menu()
         elif question == "n" or question == "N":
-            pass
+            choice_menu()
         else:
             print("Informations incorrect")
             View.return_menu(menu)
@@ -219,15 +219,25 @@ class View:
 
 
     @staticmethod
-    def prompt_timeRound():
-        heure = input("Entrez l'heure du round: ")
-        return heure
+    def prompt_heure_start_round():
+        heure_start = input("Entrez l'heure du début du round: ")
+        return heure_start
 
 
     @staticmethod
-    def prompt_dateRound():
-        date = input("Entrez la date du round: ")
-        return date
+    def prompt_date_start_round():
+        date_start = input("Entrez la date de début du round: ")
+        return date_start
+
+    @staticmethod
+    def prompt_heure_end_round():
+        heure_end = input("Entrez l'heure de fin du round: ")
+        return heure_end
+
+    @staticmethod
+    def prompt_date_end_round():
+        date_end = input("Entrez la date de fin du round: ")
+        return date_end
 
     @staticmethod
     def prompt_nRound():
