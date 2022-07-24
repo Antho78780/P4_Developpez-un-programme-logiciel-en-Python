@@ -37,7 +37,7 @@ class Controller:
         }
         self.tournaments_table.insert(serialized_tournament)
         self.view.phrasing_create_tournament()
-        self.return_menu()
+        self.view.return_menu(self.menu, self.create_tournament)
 
     """Ajout de joueur"""
     def create_player(self):
@@ -59,16 +59,16 @@ class Controller:
         }
         self.players_table.insert(player_serialized)
         self.view.phrasing_create_player()
-        if self.return_menu() == "n" or "N":
-            self.create_player()
-        else:
-            self.return_menu()
+        self.view.return_menu(self.menu, self.create_player)
+
+    def pass_players_tournament(self):
+        pass
 
     """Informations des joueurs dans la base de donnée"""
     def get_players_database(self):
         if self.players_table.all() == []:
             self.view.phrasing_none_players()
-            self.return_menu()
+            self.view.return_menu(self.menu, self.get_players_database)
         else:
             for player in self.players_table.all():
                 player = self.players(first_name=player["prenom"],
@@ -79,15 +79,15 @@ class Controller:
 
                 print(player)
             self.view.phrasing_len_players(self.players_table.all)
+            self.view.return_menu(self.menu, self.pass_players_tournament)
 
-            self.return_menu()
 
     """Informations des tournois dans la base de donnée"""
 
     def get_tournaments_database(self):
         if self.tournaments_table.all() == []:
             self.view.phrasing_none_tournaments()
-            self.return_menu()
+            self.view.return_menu(self.menu, self.get_tournaments_database)
         else:
             for tournament in self.tournaments_table.all():
                 tr = self.tournaments(
@@ -99,7 +99,7 @@ class Controller:
                 self.delete_date_birth_sex(tournament["joueurs"])
                 tr.add_player = tournament["joueurs"]
                 print(tr)
-            self.return_menu()
+            self.view.return_menu(self.menu, self.get_tournaments_database)
 
     def delete_date_birth_sex(self, tournament_joueurs):
         for trt in tournament_joueurs:
@@ -118,68 +118,115 @@ class Controller:
             print(objetTr)
         search_tournament = self.tournaments_table.search(trt.nom == self.view.prompt_phrasing_name_tournament())
         if search_tournament:
-            search_tournament = self.tournaments_table.all()
-            print("Vous venez d'accéder au tournoi")
+            print("Vous avez accès au tournoi")
             self.first_round(search_tournament)
             self.after_first_round(search_tournament)
         else:
             print("Tournoi introuvable")
-            self.return_menu()
+            self.view.return_menu(self.menu, self.create_round)
 
     """Trie des joueurs au premier round"""
     def first_round(self, search_tournament):
         trt = self.Query()
-        self.view.prompt_nRound()
+        rounds = self.rounds(
+            "ROUND 1", self.view.prompt_heure_start_round(),
+            self.view.prompt_date_start_round(),
+        )
         sup_moitie = search_tournament[0]["joueurs"][4:]
         inf_moitie = search_tournament[0]["joueurs"][:4]
         sup_moitie.sort(key=lambda x: x.get("classement"))
         inf_moitie.sort(key=lambda x: x.get("classement"))
-        print("----------------classement-des-joueurs---------------------")
         self.delete_date_birth_sex(search_tournament[0]["joueurs"])
         all_Match = []
+        print("<-------------Classement des joueurs-------------------->")
+        for sup in sup_moitie:
+            prenom = sup["prenom"]
+            nom = sup["nom"]
+            classement = sup["classement"]
+            score = sup["score"]
+            print(f"prenom: {prenom}, nom: {nom}, classement: {classement}, score: {score}")
+        for inf in inf_moitie:
+            prenom = inf["prenom"]
+            nom = inf["nom"]
+            classement = sup["classement"]
+            score = inf["score"]
+            print(f"prenom: {prenom}, nom: {nom}, classement: {classement}, score: {score}")
+        print("<--------------Matchs------------->")
         for i in range(len(sup_moitie)):
-            match = ([sup_moitie[i]["prenom"]] + [sup_moitie[i]["score"]], [inf_moitie[i]["prenom"]] + [inf_moitie[i]["score"]])
+            match = (
+                [sup_moitie[i]["prenom"]] + [sup_moitie[i]["score"]],
+                [inf_moitie[i]["prenom"]] + [inf_moitie[i]["score"]]
+            )
             print(match)
             all_Match.append(match)
-        for Am in all_Match:
-            print(Am)
-            result_match_first_players = int(input(f"resultat du match pour {Am[0]}: "))
-            self.players_table.update({"score": result_match_first_players}, trt.prenom == Am[0][0])
-            result_match_last_players = int(input(f"resultat du match pour {Am[1]}: "))
-            self.players_table.update({"score": result_match_last_players}, trt.prenom == Am[1][0])
-        search_tournament[0]["joueurs"] = self.players_table.all()
-        print("Round fini")
+            rounds.matchs.append(match)
+        for am in all_Match:
+            print("<-----Match en cours----------->")
+            print(am)
+
+            print("<------------Résultat----------->")
+            result_match_first_players = int(input(f"resultat du match pour {am[0][0]}: "))
+            print("<------------Résultat----------->")
+            result_match_last_players = int(input(f"resultat du match pour {am[1][0]}: "))
+
+            for i in search_tournament[0]["joueurs"]:
+                if i["prenom"] == am[0][0]:
+                    i["score"] += result_match_first_players
+                elif i["prenom"] == am[1][0]:
+                    i["score"] += result_match_last_players
+
+        rounds.heure_end = self.view.prompt_heure_end_round()
+        rounds.date_end = self.view.prompt_date_end_round()
+        search_tournament[0]["rounds"].extend([
+            rounds.name, rounds.heure_start, rounds.date_start, rounds.matchs, rounds.heure_end, rounds.date_end]
+        )
+        print("<------------------------Round 1 terminée----------------------------------->")
 
     def after_first_round(self, search_tournament):
-        trt = self.Query()
-        search_tournament[0]["joueurs"].sort(key=lambda x: (x.get("score"), x.get("classement")))
-        match1 = (
-            [search_tournament[0]["joueurs"][0]["prenom"]] + [search_tournament[0]["joueurs"][0]["score"]],
-            [search_tournament[0]["joueurs"][1]["prenom"]] + [search_tournament[0]["joueurs"][1]["score"]]
-        )
-        match2 = (
-            [search_tournament[0]["joueurs"][2]["prenom"]] + [search_tournament[0]["joueurs"][2]["score"]],
-            [search_tournament[0]["joueurs"][3]["prenom"]] + [search_tournament[0]["joueurs"][3]["score"]]
-        )
-        match3 = (
-            [search_tournament[0]["joueurs"][4]["prenom"]] + [search_tournament[0]["joueurs"][4]["score"]],
-            [search_tournament[0]["joueurs"][5]["prenom"]] + [search_tournament[0]["joueurs"][5]["score"]]
-        )
-        match4 = (
-            [search_tournament[0]["joueurs"][6]["prenom"]] + [search_tournament[0]["joueurs"][6]["score"]],
-            [search_tournament[0]["joueurs"][7]["prenom"]] + [search_tournament[0]["joueurs"][7]["score"]]
-        )
-        print(match1)
-        print(match2)
-        print(match3)
-        print(match4)
-        for i in match1, match2, match3, match4:
-            result_match_first_players = int(input(f"resultat du match pour {i[0][0]}: "))
-            self.players_table.update({"score": result_match_first_players}, trt.prenom == i[0][0])
+        test = 1
+        while search_tournament[0]["number_round"] > test:
+            test += 1
+            trt = self.Query()
+            self.print_players_after_round(search_tournament)
+            match1 = (
+                [search_tournament[0]["joueurs"][0]["prenom"]] + [search_tournament[0]["joueurs"][0]["score"]],
+                [search_tournament[0]["joueurs"][1]["prenom"]] + [search_tournament[0]["joueurs"][1]["score"]]
+            )
+            match2 = (
+                [search_tournament[0]["joueurs"][2]["prenom"]] + [search_tournament[0]["joueurs"][2]["score"]],
+                [search_tournament[0]["joueurs"][3]["prenom"]] + [search_tournament[0]["joueurs"][3]["score"]]
+            )
+            match3 = (
+                [search_tournament[0]["joueurs"][4]["prenom"]] + [search_tournament[0]["joueurs"][4]["score"]],
+                [search_tournament[0]["joueurs"][5]["prenom"]] + [search_tournament[0]["joueurs"][5]["score"]]
+            )
+            match4 = (
+                [search_tournament[0]["joueurs"][6]["prenom"]] + [search_tournament[0]["joueurs"][6]["score"]],
+                [search_tournament[0]["joueurs"][7]["prenom"]] + [search_tournament[0]["joueurs"][7]["score"]]
+            )
+            for all_match in match1, match2, match3, match4:
+                print("<------Match en cours----------->")
+                print(all_match)
+                print("<------------Résultat----------->")
+                result_match_first_players = int(input(f"resultat du match pour {all_match[0][0]}: "))
+                print("<------------Résultat----------->")
+                result_match_last_players = int(input(f"resultat du match pour {all_match[1][0]}: "))
+                for i in search_tournament[0]["joueurs"]:
+                    if i["prenom"] == all_match[0][0]:
+                        i["score"] += result_match_first_players
+                    if i["prenom"] == all_match[1][0]:
+                        i["score"] += result_match_last_players
+            self.print_players_after_round(search_tournament)
 
-    """Retour au menu"""
-    def return_menu(self):
-        self.view.return_menu(self.menu)
+    def print_players_after_round(self, search_tournament):
+        search_tournament[0]["joueurs"].sort(key=lambda x: (x.get("score"), x.get("classement")))
+        print("<-------------Classement des joueurs-------------------->")
+        for i in search_tournament[0]["joueurs"]:
+            prenom = i["prenom"]
+            nom = i["nom"]
+            classement = i["classement"]
+            score = i["score"]
+            print(f"prenom: {prenom}, nom: {nom}, classement: {classement}, score: {score}")
 
     """Visualisation du menu player"""
     def menu_player(self):
