@@ -1,6 +1,5 @@
 class Players:
     """Modèle représentant les joueurs"""
-
     def __init__(self, first_name, name, date_birth, sex, ranking):
         """Initialise les détails relatifs au joueur"""
         self.first_name = first_name
