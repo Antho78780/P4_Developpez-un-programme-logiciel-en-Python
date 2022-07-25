@@ -201,10 +201,13 @@ class View:
 
     @staticmethod
     def phrasing_len_players(players_table_all):
-        if len(players_table_all()) < 8:
+        if len(players_table_all()) == 8:
+            print(f"Il y a {len(players_table_all())} joueurs qui peuvent participer au tournoi")
+        elif len(players_table_all()) < 8:
+            print(f"Il n'y a que {len(players_table_all())} joueurs")
             print("Il n'y a pas assez de joueurs pour participer a un tournoi")
         else:
-            print("Il y a", len(players_table_all()), "joueurs qui peuvent participer au tournoi")
+            print(f"Il y a que {len(players_table_all())} joueurs maximums qui peuvent participer à un tournoi")
 
     @staticmethod
     def prompt_round():
